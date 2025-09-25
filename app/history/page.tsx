@@ -1,12 +1,9 @@
+
+
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, Timestamp } from "firebase/firestore"; // ✅ import Timestamp
 import { db } from "../lib/firebase";
 
 interface Sale {
@@ -16,15 +13,13 @@ interface Sale {
   sellingPrice: number;
   cost: number;
   remaining?: number;
-  date?: any; // Firebase Timestamp ya string
-  lastSold?: any; // Firebase Timestamp ya string
+  date?: Timestamp | string; // Firebase Timestamp or string
+  lastSold?: Timestamp | string; // Firebase Timestamp or string
 }
 
 export default function HistoryPage() {
   const [sales, setSales] = useState<Sale[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch sales from Firestore
   const fetchSales = async () => {
     const snapshot = await getDocs(collection(db, "history"));
     const data = snapshot.docs.map((docSnap) => ({
@@ -38,22 +33,10 @@ export default function HistoryPage() {
     fetchSales();
   }, []);
 
-  // Clear all history
-  const clearHistory = async () => {
-    if (!confirm("Are you sure you want to clear all history?")) return;
-    setLoading(true);
-    const snapshot = await getDocs(collection(db, "history"));
-    await Promise.all(
-      snapshot.docs.map((d) => deleteDoc(doc(db, "history", d.id)))
-    );
-    setSales([]);
-    setLoading(false);
-  };
-
-  // Format Firebase Timestamp or string date
-  const formatTime = (date?: any) => {
+  // ✅ Properly type date parameter
+  const formatTime = (date?: Timestamp | string) => {
     if (!date) return "-";
-    const d = date.toDate ? date.toDate() : new Date(date);
+    const d = date instanceof Timestamp ? date.toDate() : new Date(date);
     if (isNaN(d.getTime())) return "-";
     return d.toLocaleString("en-US", {
       hour: "numeric",
@@ -63,6 +46,20 @@ export default function HistoryPage() {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  // Add missing state and function for clearHistory and loading
+  const [loading, setLoading] = useState(false);
+
+  const clearHistory = async () => {
+    setLoading(true);
+    const snapshot = await getDocs(collection(db, "history"));
+    const deletePromises = snapshot.docs.map((docSnap) =>
+      deleteDoc(doc(db, "history", docSnap.id))
+    );
+    await Promise.all(deletePromises);
+    await fetchSales();
+    setLoading(false);
   };
 
   return (

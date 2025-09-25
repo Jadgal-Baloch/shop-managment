@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import toast, { Toaster } from "react-hot-toast";
+import { Timestamp } from "firebase/firestore";
+
 
 interface Sale {
   id: string;
@@ -12,7 +14,7 @@ interface Sale {
   sellingPrice: number;
   cost: number;
   remaining?: number;
-  date: any; // Firestore timestamp
+  date?: Timestamp | string; // Firebase Timestamp or string
 }
 
 export default function ReportsPage() {
@@ -36,7 +38,11 @@ export default function ReportsPage() {
 
       // Filter only this month's data
       const monthData = data.filter((h) => {
-        const d = h.date?.toDate ? h.date.toDate() : new Date(h.date);
+        const d = h.date instanceof Timestamp
+          ? h.date.toDate()
+          : h.date
+            ? new Date(h.date)
+            : new Date(0);
         return d >= startOfMonth && d < startOfNextMonth;
       });
 
@@ -94,7 +100,11 @@ export default function ReportsPage() {
       s.quantity?.toString() ?? "0",
       s.sellingPrice?.toString() ?? "0",
       s.quantity && s.quantity > 0 ? ((s.sellingPrice - s.cost) * s.quantity).toString() : "0",
-      s.date ? s.date.toDate().toLocaleString() : "",
+      s.date
+        ? typeof s.date === "object" && "toDate" in s.date
+          ? s.date.toDate().toLocaleString()
+          : new Date(s.date).toLocaleString()
+        : "",
       s.remaining !== undefined ? s.remaining.toString() : "",
       s.quantity === 0 ? (s.cost * (s.remaining || 0)).toString() : "0",
     ]);
@@ -174,7 +184,11 @@ export default function ReportsPage() {
                         Rs {s.quantity && s.quantity > 0 ? (s.sellingPrice - s.cost) * s.quantity : 0}
                       </td>
                       <td className="p-3 text-sm sm:text-base">
-                        {s.date ? s.date.toDate().toLocaleString() : "-"}
+                        {s.date
+                          ? typeof s.date === "object" && "toDate" in s.date
+                            ? s.date.toDate().toLocaleString()
+                            : new Date(s.date).toLocaleString()
+                          : "-"}
                       </td>
                       <td className="p-3 text-sm sm:text-base">{s.remaining ?? "-"}</td>
                       <td className="p-3 text-sm sm:text-base">

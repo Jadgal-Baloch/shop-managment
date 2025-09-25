@@ -25,11 +25,14 @@ export default function InventoryPage() {
   const [items, setItems] = useState<Item[]>([]);
 
   // Fetch all items
-  const fetchItems = async () => {
-    const snapshot = await getDocs(collection(db, "items"));
-    const data = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as Item[];
-    setItems(data);
-  };
+const fetchItems = async () => {
+  const snapshot = await getDocs(collection(db, "items"));
+  const data: Item[] = snapshot.docs.map((d) => {
+    const itemData = d.data() as Omit<Item, "id">; // type the data without the id
+    return { id: d.id, ...itemData };
+  });
+  setItems(data);
+};
 
   useEffect(() => {
     fetchItems();
