@@ -123,7 +123,7 @@ export default function ReportsPage() {
         </h1>
 
         {/* 🔹 Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <div className="p-4 bg-gray-700 rounded-lg shadow">
             <h2 className="text-gray-300 text-sm sm:text-base">Total Sales</h2>
             <p className="text-xl font-bold text-blue-400">Rs {totalSales}</p>
@@ -140,7 +140,7 @@ export default function ReportsPage() {
             <h2 className="text-gray-300 text-sm sm:text-base">Remaining Stock</h2>
             <p className="text-xl font-bold text-red-400">{totalRemaining}</p>
           </div>
-          <div className="p-4 bg-gray-700 rounded-lg shadow col-span-1 sm:col-span-2 md:col-span-4">
+          <div className="p-4 bg-gray-700 rounded-lg shadow">
             <h2 className="text-gray-300 text-sm sm:text-base">Total Invested</h2>
             <p className="text-xl font-bold text-yellow-400">Rs {totalInvested}</p>
           </div>
