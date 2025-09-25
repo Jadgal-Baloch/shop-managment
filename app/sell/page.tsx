@@ -11,6 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Item {
   id: string;
@@ -39,10 +40,13 @@ export default function SellPage() {
 
   const handleSell = async () => {
     const item = items.find((i) => i.id === selected);
-    if (!item) return;
+    if (!item) {
+      toast.error("Please select an item!");
+      return;
+    }
 
     if (quantity > item.quantity) {
-      alert("Not enough stock!");
+      toast.error("Not enough stock!");
       return;
     }
 
@@ -78,37 +82,53 @@ export default function SellPage() {
       });
     }
 
-    alert(`Sold ${quantity} ${item.name}(s). Profit: Rs ${profit}`);
+    toast.success(`Sold ${quantity} ${item.name}(s). Profit: Rs ${profit}`);
+    setSelected("");
+    setQuantity(1);
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">💸 Sell Item</h1>
-      <select
-        value={selected}
-        onChange={(e) => setSelected(e.target.value)}
-        className="border p-2"
-      >
-        <option value="">Select item</option>
-        {items.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.name} (Stock: {item.quantity})
-          </option>
-        ))}
-      </select>
-      <input
-        type="number"
-        min="1"
-        value={quantity}
-        onChange={(e) => setQuantity(Number(e.target.value))}
-        className="border p-2 ml-2"
-      />
-      <button
-        onClick={handleSell}
-        className="ml-2 bg-green-600 text-white px-4 py-2 rounded"
-      >
-        Sell
-      </button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4 sm:p-6 md:p-8">
+      <Toaster position="top-right" reverseOrder={false} />
+      <div className="w-full max-w-lg bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-white">
+          💸 Sell Item
+        </h1>
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Select Item</label>
+            <select
+              value={selected}
+              onChange={(e) => setSelected(e.target.value)}
+              className="w-full border border-gray-600 bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition placeholder-gray-400"
+            >
+              <option value="">Select item</option>
+              {items.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} (Stock: {item.quantity})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Quantity</label>
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              className="w-full border border-gray-600 bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition placeholder-gray-400"
+              autoComplete="off"
+            />
+          </div>
+          <button
+            onClick={handleSell}
+            className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition font-semibold"
+          >
+            Sell
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
